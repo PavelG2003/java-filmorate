@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
-    private static final Instant CINEMA_BIRTH_DATE = Instant.parse("1895-12-28T00:00:00Z");
+    private static final LocalDate CINEMA_BIRTH_DATE = LocalDate.of(1895, 12, 28);
 
     @GetMapping
     public Collection<Film> getFilms() {
@@ -40,7 +41,7 @@ public class FilmController {
             log.warn("Ошибка валидации даты релиза фильма, получен: {}", film.getReleaseDate());
             throw new ConditionsNotMetException("Дата релиза — не раньше 28 декабря 1895 года");
         }
-        if ((film.getDuration().isNegative()) || (film.getDuration().isZero())) {
+        if (film.getDuration() <= 0) {
             log.warn("Ошибка валидации продолжительности фильма, получен: {}", film.getDuration());
             throw new ConditionsNotMetException("Продолжительность фильма должна быть положительным числом");
         }
@@ -63,7 +64,7 @@ public class FilmController {
 
         if (films.containsKey(newFilmId)) {
             Film oldFilm = films.get(newFilmId);
-            if ((newFilm.getName() == null) || (newFilm.getDescription() == null) || (newFilm.getDuration() == null) ||
+            if ((newFilm.getName() == null) || (newFilm.getDescription() == null) || (newFilm.getDuration() == 0) ||
                     (newFilm.getReleaseDate() == null)) {
                 log.info("Не все данные для изменения пользователя были переданы");
                 return oldFilm;
