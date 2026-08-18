@@ -5,8 +5,7 @@ import ru.yandex.practicum.filmorate.exceptions.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,17 +43,17 @@ class FilmControllerTest {
     @Test
     void shouldAcceptCinemaBirthDate() {
         Film film = validFilm();
-        film.setReleaseDate(Instant.parse("1895-12-28T00:00:00Z"));
+        film.setReleaseDate(LocalDate.of(1895, 12, 28));
 
         Film createdFilm = controller.create(film);
 
-        assertEquals(Instant.parse("1895-12-28T00:00:00Z"), createdFilm.getReleaseDate());
+        assertEquals(LocalDate.of(1895, 12, 28), createdFilm.getReleaseDate());
     }
 
     @Test
     void shouldRejectReleaseDateBeforeCinemaBirthDate() {
         Film film = validFilm();
-        film.setReleaseDate(Instant.parse("1895-12-27T23:59:59Z"));
+        film.setReleaseDate(LocalDate.of(1895, 12, 27));
 
         assertThrows(ConditionsNotMetException.class, () -> controller.create(film));
     }
@@ -62,7 +61,7 @@ class FilmControllerTest {
     @Test
     void shouldRejectZeroDuration() {
         Film film = validFilm();
-        film.setDuration(Duration.ZERO);
+        film.setDuration(0);
 
         assertThrows(ConditionsNotMetException.class, () -> controller.create(film));
     }
@@ -70,7 +69,7 @@ class FilmControllerTest {
     @Test
     void shouldRejectNegativeDuration() {
         Film film = validFilm();
-        film.setDuration(Duration.ofMinutes(-1));
+        film.setDuration(-1);
 
         assertThrows(ConditionsNotMetException.class, () -> controller.create(film));
     }
@@ -87,8 +86,8 @@ class FilmControllerTest {
         Film film = new Film();
         film.setName("Film");
         film.setDescription("Description");
-        film.setReleaseDate(Instant.parse("2000-01-01T00:00:00Z"));
-        film.setDuration(Duration.ofMinutes(120));
+        film.setReleaseDate(LocalDate.of(2000, 01, 01));
+        film.setDuration(120);
         return film;
     }
 }
