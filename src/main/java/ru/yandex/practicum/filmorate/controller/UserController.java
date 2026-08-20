@@ -27,28 +27,11 @@ public class UserController {
     @PostMapping
     public User create(@RequestBody @Valid User user) {
         log.info("Post /users создание нового пользователя: {}", user.getName());
-        String userEmail = user.getEmail();
-        String userLogin = user.getLogin();
-        String userName = user.getName();
-        LocalDate userBirthday = user.getBirthday();
-        LocalDate today = LocalDate.now();
-        if ((userEmail == null) || (userEmail.isBlank()) || (!userEmail.contains("@"))) {
-            log.warn("Ошибка валидации email, получен: {}", userEmail);
-            throw new ConditionsNotMetException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if ((userLogin == null) || (userLogin.isBlank())) {
-            log.warn("Ошибка валидации login, получен: {}", userLogin);
-            throw new ConditionsNotMetException("Логин не может быть пустым и содержать пробелы");
-        }
-        if ((userName == null) || (userName.isBlank())) {
-            log.debug("Имя пользователя заменено на логин: {}", userLogin);
-            user.setName(userLogin);
-        }
-        if ((userBirthday != null) && (userBirthday.isAfter(today))) {
-            log.warn("Ошибка валидации дня рождения пользователя, получено: {}", userBirthday);
-            throw new ConditionsNotMetException("Дата рождения не может быть в будущем");
-        }
 
+        if ((user.getName() != null) || (user.getName().isBlank())) {
+            log.debug("Имя пользователя заменено на логин: {}", user.getLogin());
+            user.setName(user.getLogin());
+        }
         user.setId(getNextId());
         log.debug("Пользователю сгенерирован id: {}", user.getId());
         users.put(user.getId(), user);
@@ -57,7 +40,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody @Valid User newUser) {
+    public User update(@RequestBody User newUser) {
         log.info("PUT /users - обновление пользователя с id: {}", newUser.getId());
         Long newUserId = newUser.getId();
         if (newUserId == null) {
@@ -66,26 +49,45 @@ public class UserController {
         }
 
         if (users.containsKey(newUserId)) {
-            String newUserEmail = newUser.getEmail();
-            String newUserLogin = newUser.getLogin();
-            String newUserName = newUser.getName();
-            LocalDate newUserBirthday = newUser.getBirthday();
             User oldUser = users.get(newUserId);
-            if ((newUserName == null) || (newUserBirthday == null) ||
-                    (newUserLogin == null) || (newUserEmail == null)
-            ) {
-                log.info("Не все данные для изменения пользователя были переданы");
-                return oldUser;
+            if (newUser.getName() != null) {
+                oldUser.setName(newUser.getName());
             }
-            oldUser.setBirthday(newUserBirthday);
-            oldUser.setLogin(newUserLogin);
-            oldUser.setEmail(newUserEmail);
-            oldUser.setName(newUserName);
+            if (newUser.getBirthday() != null) {
+                if (newUser.getBirthday().isAfter(LocalDate.now())) {
+                    log.warn("Ошибка валидации дня рождения пользователя, получено: {}", newUser.getBirthday());
+                    throw new ConditionsNotMetException("День рождение не может быть в будущем");
+                }
+                oldUser.setBirthday(newUser.getBirthday());
+            }
+            if (newUser.getEmail() != null) {
+                if (newUser.getEmail().isBlank()) {
+                    log.warn("Ошибка валидации Email пользователя, получено: {}", newUser.getEmail());
+                    throw new ConditionsNotMetException("Email не должен быть пустым");
+                }
+                if (!newUser.getEmail().contains("@")) {
+                    log.warn("Ошибка валидации Email пользователя, получено: {}", newUser.getEmail());
+                    throw new ConditionsNotMetException("Email должен содержать символ @");
+                }
+                oldUser.setEmail(newUser.getEmail());
+            }
+            if (newUser.getLogin() != null) {
+                if (newUser.getLogin().isBlank()) {
+                    log.warn("Ошибка валидации Login пользователя, получено: {}", newUser.getLogin());
+                    throw new ConditionsNotMetException("Login не должен быть пустым");
+                }
+                oldUser.setLogin(newUser.getLogin());
+            }
+            if (oldUser.getName() == null) {
+                oldUser.setName(newUser.getLogin());
+            }
+
+
             log.info("Пользователь с id: {} успешно обновлён", newUserId);
             return oldUser;
         } else {
             log.warn("Пользователь с id: {} не был найден", newUserId);
-            throw new NotFoundException("Пользователь с данным id не найден");
+            throw new NotFoundException("Пользователь с id: " + newUserId + "не был найден");
         }
     }
 

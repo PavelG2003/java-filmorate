@@ -28,21 +28,10 @@ public class FilmController {
     @PostMapping
     public Film create(@RequestBody @Valid Film film) {
         log.info("POST /films, создание нового фильма: {}", film.getName());
-        if ((film.getName() == null) || (film.getName().isBlank())) {
-            log.warn("Ошибка валидации имени фильма, получен: {}", film.getName());
-            throw new ConditionsNotMetException("Название не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            log.warn("Ошибка валидации описании фильма, получен: {}", film.getDescription());
-            throw new ConditionsNotMetException("Максимальная длина описания — 200 символов");
-        }
+
         if (film.getReleaseDate().isBefore(CINEMA_BIRTH_DATE)) {
             log.warn("Ошибка валидации даты релиза фильма, получен: {}", film.getReleaseDate());
             throw new ConditionsNotMetException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() <= 0) {
-            log.warn("Ошибка валидации продолжительности фильма, получен: {}", film.getDuration());
-            throw new ConditionsNotMetException("Продолжительность фильма должна быть положительным числом");
         }
 
         film.setId(getNextId());
@@ -53,7 +42,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@RequestBody @Valid Film newFilm) {
+    public Film update(@RequestBody Film newFilm) {
         log.info("PUT /films - обновление пользователя с id: {}", newFilm.getId());
         Long newFilmId = newFilm.getId();
         if (newFilmId == null) {
@@ -63,20 +52,40 @@ public class FilmController {
 
         if (films.containsKey(newFilmId)) {
             Film oldFilm = films.get(newFilmId);
-            if ((newFilm.getName() == null) || (newFilm.getDescription() == null) || (newFilm.getDuration() == 0) ||
-                    (newFilm.getReleaseDate() == null)) {
-                log.info("Не все данные для изменения пользователя были переданы");
-                return oldFilm;
+            if (newFilm.getName() != null) {
+                if (newFilm.getName().isBlank()) {
+                    log.warn("Ошибка валидации имени фильма, получен {}", newFilm.getName());
+                    throw new ConditionsNotMetException("Название не может быть пустым");
+                }
+                oldFilm.setName(newFilm.getName());
             }
-            oldFilm.setReleaseDate(newFilm.getReleaseDate());
-            oldFilm.setName(newFilm.getName());
-            oldFilm.setDescription(newFilm.getDescription());
+            if  (newFilm.getDescription() != null) {
+                if (newFilm.getDescription().length() > 200) {
+                    log.warn("Ошибка валидации описания фильма, получен: {}", newFilm.getDescription());
+                    throw new ConditionsNotMetException("Описание фильма не может быть больше 200 символов");
+                }
+                oldFilm.setDescription(newFilm.getDescription());
+            }
+            if (newFilm.getDuration() <= 0) {
+                log.warn("Ошибка валидации продолжительности фильма, получено: {}", newFilm.getDuration());
+                throw new ConditionsNotMetException("Продолжительность фильма не может быть отрицательным числом");
+            }
             oldFilm.setDuration(newFilm.getDuration());
+
+            if (newFilm.getReleaseDate() != null) {
+                if (newFilm.getReleaseDate().isBefore(CINEMA_BIRTH_DATE)) {
+                    log.warn("Ошибка валидации даты релиза фильма, получено: {}", newFilm.getReleaseDate());
+                    throw new ConditionsNotMetException("Дата релиза фильма не может быть раньше " + CINEMA_BIRTH_DATE);
+                }
+                oldFilm.setReleaseDate(newFilm.getReleaseDate());
+            }
+
+
             log.info("Фильм с id: {} успешно обновлён", newFilmId);
             return oldFilm;
         }
         log.warn("Фильм с id: {} не был найден", newFilmId);
-        throw new NotFoundException("Фильм с данным id не найден");
+        throw new NotFoundException("Фильм с id: " + newFilmId + " не найден");
     }
 
     private long getNextId() {
