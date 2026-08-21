@@ -28,7 +28,7 @@ public class UserController {
     public User create(@RequestBody @Valid User user) {
         log.info("Post /users создание нового пользователя: {}", user.getName());
 
-        if ((user.getName() != null) || (user.getName().isBlank())) {
+        if ((user.getName() == null) || (user.getName().isBlank())) {
             log.debug("Имя пользователя заменено на логин: {}", user.getLogin());
             user.setName(user.getLogin());
         }
