@@ -25,15 +25,17 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(
                         "Указанный пользователь с id: " + friendId + " не найден"
                 ));
-        Set<Long> userFriends = user.getFriends();
-        Set<Long> otherUserFriends = friend.getFriends();
-        if (userFriends != null && userFriends.contains(friend.getId())) {
+        Set<User> userFriends = user.getFriends();
+        Set<User> otherUserFriends = friend.getFriends();
+        if (userFriends != null && userFriends.contains(friend)) {
             throw new DuplicatedDataException("Пользователь с id: " + friendId + " уже есть в друзьях");
         }
-        if (otherUserFriends != null && otherUserFriends.contains(user.getId())) {
+        if (otherUserFriends != null && otherUserFriends.contains(user)) {
             throw new DuplicatedDataException("Пользователь с id: " + friendId + " уже есть в друзьях");
         }
-        userFriends.add(friend.getId());
+        userFriends.add(friend);
+        otherUserFriends.add(user);
+        user.getFriends();
     }
 
     public void deleteFriend(Long userId, Long friendId) {
@@ -45,14 +47,19 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(
                         "Указанный пользователь с id: " + friendId + " не найден"
                 ));
-        Set<Long> userFriends = user.getFriends();
-        if (userFriends != null && !userFriends.contains(friend.getId())) {
-            throw new ConditionsNotMetException("Пользователь с id: " + friendId + " уже есть в друзьях");
+        Set<User> userFriends = user.getFriends();
+        Set<User> otherUserFriends = friend.getFriends();
+        if (userFriends == null || !userFriends.contains(friend)) {
+           return;
         }
-        userFriends.remove(friend.getId());
+        if (otherUserFriends == null && !otherUserFriends.contains(user)) {
+            return;
+        }
+        userFriends.remove(friend);
+        otherUserFriends.remove(user);
     }
 
-    public Set<Long> getCombinedFriends(Long userId, Long otherId) {
+    public Set<User> getCombinedFriends(Long userId, Long otherId) {
         User user = userStorage.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException(
                         "Указанный пользователь c id: " + userId + " не найден"
@@ -61,14 +68,14 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(
                         "Указанный пользователь с id: " + otherId + " не найден"
                 ));
-        Set<Long> userFriends = user.getFriends();
-        Set<Long> otherUserFriends = otherUser.getFriends();
+        Set<User> userFriends = user.getFriends();
+        Set<User> otherUserFriends = otherUser.getFriends();
         return userFriends.stream()
                 .filter(otherUserFriends::contains)
                 .collect(Collectors.toSet());
     }
 
-    public Set<Long> getUserFriends(Long userId) {
+    public Set<User> getUserFriends(Long userId) {
         User user = userStorage.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException(
                         "Указанный пользователь c id: " + userId + " не найден"

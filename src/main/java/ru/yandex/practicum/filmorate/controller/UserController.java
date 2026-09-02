@@ -61,7 +61,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Set<Long> getUserFriends(@PathVariable Long id) {
+    public Set<User> getUserFriends(@PathVariable Long id) {
         if (id == null) {
             throw new ValidationException("Id пользователя не может быть равно null");
         }
@@ -69,7 +69,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<Long> getCombinedFriends(@PathVariable Long id, @PathVariable Long otherId) {
+    public Set<User> getCombinedFriends(@PathVariable Long id, @PathVariable Long otherId) {
         if ((id == null) || (otherId == null)) {
             throw new ValidationException("Id пользователя не может быть равно null");
         }
