@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -31,7 +32,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("POST /films, создание нового фильма: {}", film.getName());
         if (film.getReleaseDate().isBefore(CINEMA_BIRTH_DATE)) {
             log.warn("Ошибка валидации даты релиза фильма, получен: {}", film.getReleaseDate());
-            throw new ConditionsNotMetException("Дата релиза — не раньше 28 декабря 1895 года");
+            throw new ValidationException("Дата релиза — не раньше " + CINEMA_BIRTH_DATE);
         }
         film.setId(getNextId());
         log.debug("Фильму сгенерирован id: {}", film.getId());
@@ -74,7 +75,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             if (newFilm.getReleaseDate() != null) {
                 if (newFilm.getReleaseDate().isBefore(CINEMA_BIRTH_DATE)) {
                     log.warn("Ошибка валидации даты релиза фильма, получено: {}", newFilm.getReleaseDate());
-                    throw new ConditionsNotMetException("Дата релиза фильма не может быть раньше " + CINEMA_BIRTH_DATE);
+                    throw new ValidationException("Дата релиза фильма не может быть раньше " + CINEMA_BIRTH_DATE);
                 }
                 oldFilm.setReleaseDate(newFilm.getReleaseDate());
             }

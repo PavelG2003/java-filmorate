@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -52,7 +51,7 @@ public class UserService {
         if (userFriends == null || !userFriends.contains(friend)) {
            return;
         }
-        if (otherUserFriends == null && !otherUserFriends.contains(user)) {
+        if (otherUserFriends == null || !otherUserFriends.contains(user)) {
             return;
         }
         userFriends.remove(friend);
