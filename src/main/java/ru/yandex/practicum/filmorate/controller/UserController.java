@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -23,14 +25,14 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody @Valid User user) {
-        return userService.create(user);
+    public User create(@RequestBody @Valid NewUserRequest request) {
+        return userService.create(request);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public User update(@RequestBody User newUser) {
-       return userService.update(newUser);
+    public User update(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+       return userService.update(id, request);
     }
 
     @DeleteMapping("/{id}")

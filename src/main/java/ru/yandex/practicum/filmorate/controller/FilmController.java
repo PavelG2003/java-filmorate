@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -24,14 +26,14 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Film create(@RequestBody @Valid Film film) {
+    public Film create(@RequestBody @Valid NewFilmRequest film) {
         return filmService.create(film);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Film update(@RequestBody Film newFilm) {
-        return filmService.update(newFilm);
+    public Film update(@PathVariable Long id,  @RequestBody UpdateFilmRequest newFilm) {
+        return filmService.update(id, newFilm);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -47,7 +49,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getFilmList(@RequestParam(defaultValue = "10") String count) {
-        return filmService.getFilmList(count);
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") String count) {
+        return filmService.getPopular(count);
     }
 }
