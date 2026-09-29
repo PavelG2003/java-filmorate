@@ -32,8 +32,12 @@ CREATE TABLE IF NOT EXISTS films (
     release_date DATE NOT NULL,
     duration INTEGER NOT NULL CHECK (duration > 0),
     mpa_id INTEGER NOT NULL,
-    FOREIGN KEY (mpa_id) REFERENCES mpa(id)
+    CONSTRAINT fk_films_mpa FOREIGN KEY (mpa_id) REFERENCES mpa(id)
 );
+
+ALTER TABLE films ADD COLUMN IF NOT EXISTS mpa_id INTEGER;
+ALTER TABLE films ADD CONSTRAINT IF NOT EXISTS fk_films_mpa
+    FOREIGN KEY (mpa_id) REFERENCES mpa(id);
 
 CREATE TABLE IF NOT EXISTS film_likes (
     film_id BIGINT NOT NULL,

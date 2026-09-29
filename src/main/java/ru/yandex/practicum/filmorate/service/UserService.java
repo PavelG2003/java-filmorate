@@ -111,24 +111,13 @@ public class UserService {
         User otherUser = findUserInDb(otherId);
         log.debug("Другой пользователь найден: id={}", otherId);
 
-        Set<User> userFriends = user.getFriends();
-        Set<User> otherUserFriends = otherUser.getFriends();
-        if (userFriends == null || userFriends.isEmpty()) {
-            log.info("У пользователя {} нет друзей, общих друзей не найдено", userId);
-            return new HashSet<>();
-        }
-
-        if (otherUserFriends == null || otherUserFriends.isEmpty()) {
-            log.info("У пользователя {} нет друзей, общих друзей не найдено", otherId);
-            return new HashSet<>();
-        }
-
         Set<User> combinedFriends = userDbStorage.getCommonFriends(userId, otherId);
         log.info("Найдено {} общих друзей между пользователями {} и {}", combinedFriends.size(), userId, otherId);
         return combinedFriends;
     }
 
     public Set<User> getUserFriends(Long userId) {
+       findUserInDb(userId);
        return userDbStorage.getUserFriends(userId);
     }
 

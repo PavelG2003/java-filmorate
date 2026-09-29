@@ -35,6 +35,11 @@ public class FilmService {
     private final MpaDbStorage mpaDbStorage;
     private static final LocalDate CINEMA_BIRTH_DATE = LocalDate.of(1895, 12, 28);
 
+    public Film getFilmById(long id) {
+        return filmDbStorage.getFilmById(id)
+                .orElseThrow(() -> new NotFoundException("Фильм с id " + id + " не найден"));
+    }
+
     public Collection<Film> getFilms() {
         log.info("GET /films - запрос всех фильмов");
         return filmDbStorage.getFilms();
@@ -67,6 +72,14 @@ public class FilmService {
         Film updatedFilm = filmDbStorage.getFilmById(filmRequestId)
                 .map(film -> FilmMapper.updateFilmFields(film, filmRequest))
                 .orElseThrow(() -> new NotFoundException("фильм с id "  + filmRequestId + "не найден"));
+        if (updatedFilm.getReleaseDate().isBefore(CINEMA_BIRTH_DATE)) {
+            throw new ValidationException("Дата релиза — не раньше " + CINEMA_BIRTH_DATE);
+        }
+        if (updatedFilm.getMpa() == null || updatedFilm.getMpa().getId() == null) {
+            throw new ValidationException("Нужно указать id рейтинга MPA");
+        }
+        updatedFilm.setMpa(getMpaById(updatedFilm.getMpa().getId()));
+        updatedFilm.setGenres(resolveGenres(updatedFilm.getGenres()));
         return filmDbStorage.update(updatedFilm);
     }
 
