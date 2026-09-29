@@ -15,12 +15,24 @@ CREATE TABLE IF NOT EXISTS friendships (
     CHECK (user_id <> friend_id)
 );
 
+CREATE TABLE IF NOT EXISTS mpa (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS genres (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS films (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR NOT NULL,
     description VARCHAR(200),
     release_date DATE NOT NULL,
-    duration INTEGER NOT NULL CHECK (duration > 0)
+    duration INTEGER NOT NULL CHECK (duration > 0),
+    mpa_id INTEGER NOT NULL,
+    FOREIGN KEY (mpa_id) REFERENCES mpa(id)
 );
 
 CREATE TABLE IF NOT EXISTS film_likes (
@@ -29,4 +41,12 @@ CREATE TABLE IF NOT EXISTS film_likes (
     PRIMARY KEY (film_id, user_id),
     FOREIGN KEY (film_id) REFERENCES films(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS films_genres (
+    film_id BIGINT NOT NULL,
+    genre_id INTEGER NOT NUll,
+    PRIMARY KEY (film_id, genre_id),
+    FOREIGN KEY (film_id) REFERENCES films(id),
+    FOREIGN KEY (genre_id) REFERENCES genres(id)
 );

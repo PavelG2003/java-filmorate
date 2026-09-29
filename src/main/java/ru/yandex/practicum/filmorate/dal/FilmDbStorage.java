@@ -4,20 +4,22 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class FilmDbStorage extends BaseRepository<Film> {
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE id = ?";
-    private static final String FIND_ALL_QUERY = "SELECT * FROM films";
+    private static final String FIND_ALL_FILMS_QUERY = "SELECT * FROM films";
     private static final String UPDATE_QUERY = "UPDATE films SET name = ?, description = ?," +
-            " releaseDate = ?, duration = ? WHERE id = ?";
-    private static final String INSERT_QUERY = "INSERT INTO films(name, description, release_date, duration) " +
-            "VALUES (?, ?, ?, ?)";
+            " release_date = ?, duration = ?, mpa_id = ? WHERE id = ?";
+    private static final String INSERT_QUERY = "INSERT INTO films(name, description, release_date, duration, mpa_id) " +
+            "VALUES (?, ?, ?, ?, ?)";
     private static final String ADD_LIKE_QUERY = "INSERT INTO film_likes(film_id, user_id) VALUES (?, ?)";
-    private static final String DELETE_LIKE_QUERY = "DELETE FROM film_likes WHERE film_id = ?, user_id = ?";
+    private static final String DELETE_LIKE_QUERY = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
     private static final String FIND_POPULAR_QUERY = "SELECT f.*" +
             "        FROM films AS f" +
             "        LEFT JOIN film_likes AS fl ON fl.film_id = f.id" +
@@ -39,7 +41,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
     }
 
     public List<Film> getFilms() {
-        return findMany(FIND_ALL_QUERY);
+        return findMany(FIND_ALL_FILMS_QUERY);
     }
 
     public Film create(Film film) {
@@ -48,7 +50,8 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
-                film.getDuration()
+                film.getDuration(),
+                film.getMpa().getId()
                 );
         film.setId(id);
         return film;
@@ -60,6 +63,7 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
+                film.getMpa().getId(),
                 film.getId()
                 );
         return film;
@@ -76,5 +80,20 @@ public class FilmDbStorage extends BaseRepository<Film> {
 
     public List<Film> getPopular(int count) {
         return findMany(FIND_POPULAR_QUERY, count);
+    }
+
+    private void saveGenres(Film film) {
+        jdbc.update(
+                "DELETE FROM films_genres WHERE film_id = ?",
+                film.getId()
+        );
+
+        for (Genre genre : film.getGenres()) {
+            jdbc.update(
+                    "INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?)",
+                    film.getId(),
+                    genre.getId()
+            );
+        }
     }
 }

@@ -13,11 +13,9 @@ public class NewUserRequest {
     @Email
     @NotBlank
     private String email;
-
     @NotBlank
     private String login;
     private String name;
-
     @NotNull
     @Past
     private LocalDate birthday;

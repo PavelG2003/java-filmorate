@@ -29,10 +29,10 @@ public class UserController {
         return userService.create(request);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public User update(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
-       return userService.update(id, request);
+    public User update(@Valid @RequestBody UpdateUserRequest request) {
+       return userService.update(request);
     }
 
     @DeleteMapping("/{id}")

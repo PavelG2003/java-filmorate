@@ -16,11 +16,11 @@ public class UserDbStorage extends BaseRepository<User> {
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";
     private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?," +
             " name = ?, birthday = ? WHERE id = ?";
-    private static final String INSERT_QUERY = "INSERT INTO users(id, email, login, name, birthday" +
-            "VALUES (?, ?, ?, ?, ?) returning id";
+    private static final String INSERT_QUERY = "INSERT INTO users(email, login, name, birthday) " +
+            "VALUES (?, ?, ?, ?)";
     private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
     private static final String ADD_FRIEND_QUERY = "INSERT INTO friendships(user_id, friend_id) VALUES (?, ?)";
-    private static final String DELETE_FRIEND_QUERY = "DELETE FROM friendships WHERE user_id = ?, friend_id = ?";
+    private static final String DELETE_FRIEND_QUERY = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
     private static final String GET_USER_FRIENDS_QUERY = " SELECT u.*" +
             "        FROM users u" +
             "        JOIN friendships f ON u.id = f.friend_id" +
@@ -46,7 +46,6 @@ public class UserDbStorage extends BaseRepository<User> {
     public User create(User user) {
         long id = insert(
                 INSERT_QUERY,
-                user.getId(),
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),

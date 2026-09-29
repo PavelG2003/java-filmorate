@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dal.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dal.MpaDbStorage;
 import ru.yandex.practicum.filmorate.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
@@ -16,19 +19,20 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FilmService {
     private final FilmDbStorage filmDbStorage;
-    private final UserDbStorage userDbStorage;
+    private final GenreDbStorage genreDbStorage;
+    private final MpaDbStorage mpaDbStorage;
     private static final LocalDate CINEMA_BIRTH_DATE = LocalDate.of(1895, 12, 28);
 
     public Collection<Film> getFilms() {
@@ -44,19 +48,25 @@ public class FilmService {
             log.warn("Ошибка валидации даты релиза фильма, получен: {}", film.getReleaseDate());
             throw new ValidationException("Дата релиза — не раньше " + CINEMA_BIRTH_DATE);
         }
+        if ((filmRequest.getMpa() == null) || (filmRequest.getMpa().getId() == null)) {
+            throw new ValidationException("нужно указать id рейтинга mpa");
+        }
+        film.setMpa(getMpaById(filmRequest.getMpa().getId()));
+        film.setGenres(resolveGenres(filmRequest.getGenres()));
         return filmDbStorage.create(film);
     }
 
-    public Film update(Long filmId, UpdateFilmRequest filmRequest) {
-        log.info("PUT /films - обновление фильма с id: {}", filmId);
-
-        if (filmId == null) {
+    public Film update(UpdateFilmRequest filmRequest) {
+        if (filmRequest.getId() == null) {
             log.warn("При изменении фильма не передали id");
             throw new ConditionsNotMetException("id должен быть указан");
         }
-        Film updatedFilm = filmDbStorage.getFilmById(filmId)
+        long filmRequestId = filmRequest.getId();
+        log.info("PUT /films - обновление фильма с id: {}", filmRequestId);
+
+        Film updatedFilm = filmDbStorage.getFilmById(filmRequestId)
                 .map(film -> FilmMapper.updateFilmFields(film, filmRequest))
-                .orElseThrow(() -> new NotFoundException("film с id "  + filmId + "не найден"));
+                .orElseThrow(() -> new NotFoundException("фильм с id "  + filmRequestId + "не найден"));
         return filmDbStorage.update(updatedFilm);
     }
 
@@ -108,5 +118,54 @@ public class FilmService {
         List<Film> popularList = filmDbStorage.getPopular(intCount);
         log.info("Успешно получен список отсортированных по лайкам фильмов");
         return  popularList;
+    }
+
+    public Collection<Genre> getGenres() {
+        return genreDbStorage.getGenres();
+    }
+
+    public Genre getGenreById(Long genreId) {
+        if (genreId == null) {
+            log.warn("При запросе жанров не передали id");
+            throw new ConditionsNotMetException("id должен быть указан");
+        }
+        return genreDbStorage.getGenreById(genreId)
+                .orElseThrow(() -> new NotFoundException("жанр с id "  + genreId + "не найден"));
+    }
+
+    public Collection<Mpa> getMpaCollection() {
+        return mpaDbStorage.getMpaCollection();
+    }
+
+    public Mpa getMpaById(Long mpaId) {
+        if (mpaId == null) {
+            log.warn("При запросе возрастных рейтингов не передали id");
+            throw new ConditionsNotMetException("id должен быть указан");
+        }
+        return mpaDbStorage.getMpaById(mpaId)
+                .orElseThrow(() -> new NotFoundException("возрастной рейтинг с id "  + mpaId + "не найден"));
+    }
+
+    private Set<Genre> resolveGenres(Set<Genre> requestGenres) {
+        if (requestGenres == null || requestGenres.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+
+        Set<Long> ids = new TreeSet<>();
+
+        for (Genre genre : requestGenres) {
+            if (genre == null || genre.getId() == null) {
+                throw new ValidationException("Нужно указать id жанра");
+            }
+            ids.add(genre.getId());
+        }
+
+        Set<Genre> genres = new LinkedHashSet<>();
+
+        for (Long id : ids) {
+            genres.add(getGenreById(id));
+        }
+
+        return genres;
     }
 }

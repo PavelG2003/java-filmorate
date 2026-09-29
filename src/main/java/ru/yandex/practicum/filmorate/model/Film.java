@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -16,18 +17,16 @@ import java.util.Set;
 @Data
 public class Film {
     private Long id;
-
     @NotBlank
     private String name;
-
     @Size(max = 200)
     private String description;
-
     @NotNull
     private LocalDate releaseDate;
-
     @Min(1)
     private int duration;
-
+    @NotNull
+    private Mpa mpa;
+    private Set<Genre> genres = new LinkedHashSet<>();
     private Set<User> likes = new HashSet<>();
 }

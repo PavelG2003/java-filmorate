@@ -22,13 +22,13 @@ public class UserMapper {
 
     public static User updateUserFields(User user, UpdateUserRequest userRequest) {
         if (userRequest.hasEmail()) {
-            user.setEmail(user.getEmail());
+            user.setEmail(userRequest.getEmail());
         }
         if (userRequest.hasLogin()) {
-            user.setLogin(user.getLogin());
+            user.setLogin(userRequest.getLogin());
         }
         if (userRequest.hasName()) {
-            user.setName(user.getName());
+            user.setName(userRequest.getName());
         }
         if (userRequest.hasBirthday()) {
             user.setBirthday(userRequest.getBirthday());

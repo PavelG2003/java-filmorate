@@ -30,10 +30,10 @@ public class FilmController {
         return filmService.create(film);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public Film update(@PathVariable Long id,  @RequestBody UpdateFilmRequest newFilm) {
-        return filmService.update(id, newFilm);
+    public Film update(@Valid @RequestBody UpdateFilmRequest newFilm) {
+        return filmService.update(newFilm);
     }
 
     @PutMapping("/{id}/like/{userId}")

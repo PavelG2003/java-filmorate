@@ -44,16 +44,17 @@ public class UserService {
         return userDbStorage.create(user);
     }
 
-    public User update(Long userId, UpdateUserRequest request) {
-        log.info("PUT /users - обновление пользователя с id: {}", userId);
-        if (userId == null) {
+    public User update(UpdateUserRequest request) {
+        if (request.getId() == null) {
             log.warn("При изменении пользователя не передали id");
             throw new ConditionsNotMetException("id должен быть указан");
         }
+        long requestId = request.getId();
+        log.info("PUT /users - обновление пользователя с id: {}", requestId);
 
-        User updatedUser = userDbStorage.getUserById(userId)
+        User updatedUser = userDbStorage.getUserById(requestId)
                 .map(user -> UserMapper.updateUserFields(user, request))
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + requestId + " не найден"));
         return userDbStorage.update(updatedUser);
     }
 

@@ -16,19 +16,15 @@ import java.util.Set;
 @Data
 public class User {
     private Long id;
-
     @Email
     @NotBlank
     private String email;
-
     @NotBlank
     private String login;
     private String name;
-
     @NotNull
     @Past
     private LocalDate birthday;
-
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonIgnore
