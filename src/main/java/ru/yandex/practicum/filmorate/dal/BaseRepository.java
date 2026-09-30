@@ -21,7 +21,7 @@ public class BaseRepository<T> {
         try {
             T result = jdbc.queryForObject(query, mapper, params);
             return Optional.ofNullable(result);
-        } catch (EmptyResultDataAccessException ignored){
+        } catch (EmptyResultDataAccessException ignored) {
             return Optional.empty();
         }
     }
@@ -50,7 +50,8 @@ public class BaseRepository<T> {
             for (int idx = 0; idx < params.length; idx++) {
                 ps.setObject(idx + 1, params[idx]);
             }
-            return ps;}, keyHolder);
+            return ps;
+        }, keyHolder);
 
         Long id = keyHolder.getKeyAs(Long.class);
 
