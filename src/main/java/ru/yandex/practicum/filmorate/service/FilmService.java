@@ -168,6 +168,9 @@ public class FilmService {
         }
 
         List<Genre> genres = genreDbStorage.getGenresByIds(ids);
+        if (genres.size() != ids.size()) {
+            throw new NotFoundException("Один или несколько жанров не найдены");
+        }
 
         return new LinkedHashSet<>(genres);
     }
