@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.dal.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 import java.util.LinkedHashSet;
@@ -98,12 +97,9 @@ public class FilmDbStorage extends BaseRepository<Film> {
                 film.getId()
         );
 
-        for (Genre genre : film.getGenres()) {
-            jdbc.update(
-                    SAVE_GENRES_QUERY_INSERT,
-                    film.getId(),
-                    genre.getId()
-            );
-        }
+        List<Object[]> batch = film.getGenres().stream()
+                .map(genre -> new Object[]{film.getId(), genre.getId()})
+                .toList();
+        jdbc.batchUpdate(SAVE_GENRES_QUERY_INSERT, batch);
     }
 }

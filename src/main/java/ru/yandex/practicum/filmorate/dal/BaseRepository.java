@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.util.InternalException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -33,7 +32,7 @@ public class BaseRepository<T> {
     protected void update(String query, Object... params) {
         int rowsUpdated = jdbc.update(query, params);
         if (rowsUpdated == 0) {
-            throw new InternalException("Не удалось обновить данные");
+            throw new RuntimeException("Не удалось обновить данные");
         }
     }
 
@@ -58,7 +57,7 @@ public class BaseRepository<T> {
         if (id != null) {
             return id;
         } else {
-            throw new InternalException("Не удалось сохранить данные");
+            throw new RuntimeException("Не удалось сохранить данные");
         }
     }
 }

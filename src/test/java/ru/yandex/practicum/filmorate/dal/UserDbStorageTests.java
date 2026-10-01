@@ -63,7 +63,7 @@ class UserDbStorageTests {
         User user = create("first");
         user.setId(-1L);
         assertThatThrownBy(() -> storage.update(user))
-                .isInstanceOf(org.apache.logging.log4j.util.InternalException.class);
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test

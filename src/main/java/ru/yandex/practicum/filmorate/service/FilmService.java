@@ -167,12 +167,8 @@ public class FilmService {
             ids.add(genre.getId());
         }
 
-        Set<Genre> genres = new LinkedHashSet<>();
+        List<Genre> genres = genreDbStorage.getGenresByIds(ids);
 
-        for (Long id : ids) {
-            genres.add(getGenreById(id));
-        }
-
-        return genres;
+        return new LinkedHashSet<>(genres);
     }
 }

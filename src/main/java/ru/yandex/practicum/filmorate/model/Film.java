@@ -11,9 +11,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * Film.
- */
 @Data
 public class Film {
     private Long id;

@@ -45,7 +45,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse errorHandler(final Throwable e) {
+    public ErrorResponse errorHandler(final RuntimeException e) {
         log.error("Unhandled request error", e);
         return new ErrorResponse("Произошла непридвиденная ошибка сервера");
     }
